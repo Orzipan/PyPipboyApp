@@ -43,7 +43,8 @@ class DateTimeWidget(widgets.WidgetBase):
     @QtCore.pyqtSlot()
     def _realClockUpdate(self):
         realTime = datetime.datetime.now()
-        self.widget.realTimeLabel.setText(realTime.strftime('%H:%M'))
+        realHour = realTime.strftime('%I').lstrip('0')
+        self.widget.realTimeLabel.setText(realTime.strftime(realHour + ':%M %p'))
         
     @QtCore.pyqtSlot()
     def _slotInfoUpdated(self):
@@ -64,16 +65,19 @@ class DateTimeWidget(widgets.WidgetBase):
         # Works fine on Linux though
         #gameDate = datetime.date(self.dateYear, self.dateMonth, self.dateDay)
         gameDate = str()
-        if self.dateDay < 10:
-            gameDate += '0' + str(self.dateDay) + '.'
-        else:
-            gameDate += str(self.dateDay)+ '.'
         if self.dateMonth < 10:
-            gameDate += '0' + str(self.dateMonth) + '.'
+            gameDate += '0' + str(self.dateMonth)
         else:
-            gameDate += str(self.dateMonth)+ '.'
+            gameDate += str(self.dateMonth)
+        gameDate += '/'
+        if self.dateDay < 10:
+            gameDate += '0' + str(self.dateDay)
+        else:
+            gameDate += str(self.dateDay)
+        gameDate += '/'
         gameDate += str(self.dateYear)
         gameTime = datetime.time(int(self.timeHour), self.timeMin)
-        self.widget.gameTimeLabel.setText(gameTime.strftime('%H:%M'))
+        gameHour = gameTime.strftime('%I').lstrip('0')
+        self.widget.gameTimeLabel.setText(gameTime.strftime(gameHour + ':%M %p'))
         self.widget.gameDateLabel.setText(gameDate)
         

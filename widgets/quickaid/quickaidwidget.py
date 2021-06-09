@@ -89,5 +89,5 @@ class QuickAidWidget(widgets.WidgetBase):
                 else:
                     self.Widgets.radawayButton.setEnabled(False)
                     
-                self.Widgets.stimpakButton.setText("STIMPAK (" + str(Stimpaks) + ")")
-                self.Widgets.radawayButton.setText("RADAWAY (" + str(Radaways) + ")")
+                self.Widgets.stimpakButton.setText("Stimpak (" + str(Stimpaks) + ")")
+                self.Widgets.radawayButton.setText("RadAway (" + str(Radaways) + ")")

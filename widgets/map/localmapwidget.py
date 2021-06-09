@@ -206,7 +206,7 @@ class LocalMapWidget(widgets.WidgetBase):
             self.widget.enableCheckbox.setChecked(False)
     
     
-    @QtCore.pyqtSlot(bool)
+    @QtCore.pyqtSlot(int)
     def _slotEnableMapTriggered(self, value):
         self._app.settings.setValue('localmapwidget/enabled', int(value))
         self.mapEnabledFlag = value

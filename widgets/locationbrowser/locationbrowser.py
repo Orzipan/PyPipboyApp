@@ -164,7 +164,7 @@ class SortProxyModel(QtCore.QSortFilterProxyModel):
         else:
             return super().headerData(section, orientation, role)
         
-    @QtCore.pyqtSlot(bool)        
+    @QtCore.pyqtSlot(int)
     def showUnknownLocations(self, value):
         self.showUnknown = value
         self.settings.setValue('locationbrowserwidget/showUnknown', int(value))

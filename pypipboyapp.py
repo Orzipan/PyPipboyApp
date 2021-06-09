@@ -316,7 +316,7 @@ class PyPipboyApp(QtWidgets.QApplication):
     # connect to specified host (non blocking)
     # connect happens in its own thread
     # returns true when the thread was successfully started
-    @QtCore.pyqtSlot(str, int, bool, bool)        
+    @QtCore.pyqtSlot(str, int, bool)        
     def connectToHost(self, host, port, retry = False,  busydialog= True):
         if not self.networkChannel.isConnected:
             self._logger.info('Connecting to host ' + host + ':' + str(port) + ' Retry=' + str(retry))
@@ -805,7 +805,7 @@ if __name__ == "__main__":
             logging.error('Error calling Faulthandle.enable(): ' + str(e))
             
         if (faulthandler.is_enabled()):
-            logging.warn('Faulthandler is enabled')
+            logging.warning('Faulthandler is enabled')
             #faulthandler.dump_traceback_later(5)
         else:
             logging.error('Faulthandler is NOT enabled')

@@ -20,7 +20,7 @@ class EffectsTableModel(QtCore.QAbstractTableModel):
         self.showInactive = bool(int(self.settings.value('effectswidget/showInactive', False)))
         self.signalEffectsUpdate.connect(self._slotEffectsUpdate)
         
-    @QtCore.pyqtSlot(bool)
+    @QtCore.pyqtSlot(int)
     def setShowPermanent(self, value, signal = True):
         self.showPermanent = value
         # Buggy QSettings Linux implementation forces us to save as int
@@ -28,14 +28,14 @@ class EffectsTableModel(QtCore.QAbstractTableModel):
         if signal:
             self.signalEffectsUpdate.emit()
         
-    @QtCore.pyqtSlot(bool)
+    @QtCore.pyqtSlot(int)
     def setShowEmptySources(self, value, signal = True):
         self.showEmptySources = value
         self.settings.setValue('effectswidget/showEmptySources', int(value))
         if signal:
             self.signalEffectsUpdate.emit()
     
-    @QtCore.pyqtSlot(bool)
+    @QtCore.pyqtSlot(int)
     def setShowInactive(self, value, signal = True):
         self.showInactive = value
         self.settings.setValue('effectswidget/showInactive', int(value))

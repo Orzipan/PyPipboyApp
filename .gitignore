@@ -1,8 +1,13 @@
 __pycache__
+# IDE Settings
 /.project
 /.pydevproject
 /.idea/
 /.settings/
+/.qt_for_python
+Thumbs.db
+log.txt
+# Copyright protected files
 /widgets/map/res/*.svg
 /widgets/map/res/*.png
 /widgets/playerinfo/res/*.svg
@@ -18,6 +23,5 @@ __pycache__
 /widgets/shared/res/poi_firstaid.svg
 /widgets/shared/res/book.svg
 /widgets/shared/res/award.svg
-/pypipboy/
-THumbs.db
-log.txt
+# Generated files
+ui/*.py

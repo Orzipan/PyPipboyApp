@@ -1,4 +1,4 @@
 PyQt5
 playsound
 pywin32
-git+git://github.com/silentspud/PyPipboy.git@master#egg=pypipboy
+PyPipboy @ git+git://github.com/silentspud/PyPipboy.git

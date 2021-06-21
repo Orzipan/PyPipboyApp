@@ -78,14 +78,7 @@
     <addaction name="actionPromptBeforeQuit"/>
     <addaction name="menuStyles"/>
    </widget>
-   <widget class="QMenu" name="menuSettings">
-    <property name="title">
-     <string>Settings</string>
-    </property>
-    <addaction name="actionRelayModeSettings"/>
-   </widget>
    <addaction name="menuApp"/>
-   <addaction name="menuSettings"/>
    <addaction name="menuWindow"/>
    <addaction name="menuHelp"/>
   </widget>
@@ -182,11 +175,6 @@
    </property>
    <property name="text">
     <string>Stay on Top</string>
-   </property>
-  </action>
-  <action name="actionRelayModeSettings">
-   <property name="text">
-    <string>Relay Mode</string>
    </property>
   </action>
  </widget>

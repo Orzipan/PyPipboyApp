@@ -39,6 +39,7 @@ class DataUpdateLoggerWidget(widgets.WidgetBase):
         self.widget.logTextEdit.clear()
         
     @QtCore.pyqtSlot(bool)
+    @QtCore.pyqtSlot(int)
     def _slotEnableLogging(self, value):
         if value:
             self.networkchannel.registerConnectionListener(self._onConnectionStateChange)

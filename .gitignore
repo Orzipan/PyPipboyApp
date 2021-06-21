@@ -3,6 +3,7 @@ __pycache__
 /.project
 /.pydevproject
 /.idea/
+/.vscode/
 /.settings/
 /.qt_for_python
 Thumbs.db

@@ -10,6 +10,7 @@ pypipboy = {ref = "master", git = "git://github.com/silentspud/PyPipboy.git"}
 PyQt5 = "*"
 
 [dev-packages]
+py-make = "*"
 
 [requires]
 python_version = "3"

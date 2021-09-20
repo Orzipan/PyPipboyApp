@@ -11,7 +11,9 @@ import faulthandler
 import logging.config
 import threading
 import urllib.request
-from PyQt5 import QtGui, QtWidgets, QtCore, uic
+from PyQt5 import QtGui, QtWidgets, QtCore
+from dialogs.ui_helpwidget import Ui_HelpWidget
+from dialogs.ui_mainwindow import Ui_MainWindow
 from pypipboy.network import NetworkChannel
 from pypipboy.datamanager import PipboyDataManager
 from dialogs.selecthostdialog import SelectHostDialog
@@ -34,9 +36,10 @@ class PipboyMainWindow(QtWidgets.QMainWindow):
     # Constructor
     def __init__(self, parent = None):
         super().__init__(parent)
-        uic.loadUi('ui/mainwindow.ui', self)
+        self.ui = Ui_MainWindow()
+        self.ui.setupUi(self)
         self.connectionStatusLabel = QtWidgets.QLabel("No Connection")
-        self.statusbar.addPermanentWidget(self.connectionStatusLabel)
+        self.ui.statusbar.addPermanentWidget(self.connectionStatusLabel)
         self.setCentralWidget(None) # damn thing cannot be removed in Qt-Designer
         self.setDockNestingEnabled(True)
         self.setTabPosition(QtCore.Qt.AllDockWidgetAreas, QtWidgets.QTabWidget.North)
@@ -44,10 +47,10 @@ class PipboyMainWindow(QtWidgets.QMainWindow):
     # Init function that is called after everything has been set up
     def init(self, app, networkchannel, datamanager):
         if self.isFullScreen():
-            self.actionFullscreen.setChecked(True)
+            self.ui.actionFullscreen.setChecked(True)
         else:
-            self.actionFullscreen.setChecked(False)
-        self.actionFullscreen.toggled.connect(self.setFullscreen)
+            self.ui.actionFullscreen.setChecked(False)
+        self.ui.actionFullscreen.toggled.connect(self.setFullscreen)
         
     def closeEvent(self, event):
         event.ignore() # We do our own shutdown handling
@@ -156,8 +159,10 @@ class PyPipboyApp(QtWidgets.QApplication):
         # Load Styles
         self._loadStyles()
         # Load widgets
-        self.helpWidget = uic.loadUi(os.path.join('ui', 'helpwidget.ui'))
-        self.helpWidget.textBrowser.setSource(QtCore.QUrl.fromLocalFile(os.path.join('ui', 'res', 'helpwidget.html')))
+        self.helpWidget = QtWidgets.QDockWidget()
+        self.helpWidget.ui = Ui_HelpWidget()
+        self.helpWidget.ui.setupUi(self.helpWidget)
+        self.helpWidget.ui.textBrowser.setSource(QtCore.QUrl.fromLocalFile(os.path.join('ui', 'res', 'helpwidget.html')))
         self.mainWindow.addDockWidget(QtCore.Qt.TopDockWidgetArea, self.helpWidget)
         self._loadWidgets()
         # Restore saved window state
@@ -175,23 +180,23 @@ class PyPipboyApp(QtWidgets.QApplication):
         menuActions = self.mainWindow.menuBar().actions()
         self.mainWindow.menuBar().insertMenu(menuActions[len(menuActions)-1], self.widgetMenu)
         # connect with main window
-        self.mainWindow.actionConnect.triggered.connect(self.startAutoDiscovery)
-        self.mainWindow.actionConnectTo.triggered.connect(self.showConnectToDialog)
-        self.mainWindow.actionDisconnect.triggered.connect(self.disconnect)
-        self.mainWindow.actionQuit.triggered.connect(self.requestQuit)
+        self.mainWindow.ui.actionConnect.triggered.connect(self.startAutoDiscovery)
+        self.mainWindow.ui.actionConnectTo.triggered.connect(self.showConnectToDialog)
+        self.mainWindow.ui.actionDisconnect.triggered.connect(self.disconnect)
+        self.mainWindow.ui.actionQuit.triggered.connect(self.requestQuit)
         self.mainWindow.signalWantsToQuit.connect(self.requestQuit)
-        self.mainWindow.actionShowAbout.triggered.connect(self.showAboutDialog)
-        self.mainWindow.actionShowAboutQt.triggered.connect(self.aboutQt)
-        self.mainWindow.actionAuto_Connect_on_Start_up.triggered.connect(self.autoConnectToggled)
-        self.mainWindow.actionExportData.triggered.connect(self.exportData)
-        self.mainWindow.actionImportData.triggered.connect(self.importData)
-        self.mainWindow.actionVersionCheck.triggered.connect(self.startVersionCheckVerbose)
+        self.mainWindow.ui.actionShowAbout.triggered.connect(self.showAboutDialog)
+        self.mainWindow.ui.actionShowAboutQt.triggered.connect(self.aboutQt)
+        self.mainWindow.ui.actionAuto_Connect_on_Start_up.triggered.connect(self.autoConnectToggled)
+        self.mainWindow.ui.actionExportData.triggered.connect(self.exportData)
+        self.mainWindow.ui.actionImportData.triggered.connect(self.importData)
+        self.mainWindow.ui.actionVersionCheck.triggered.connect(self.startVersionCheckVerbose)
         stayOnTop = bool(int(self.settings.value('mainwindow/stayOnTop', 0)))
-        self.mainWindow.actionStayOnTop.toggled.connect(self.setWindowStayOnTop)
-        self.mainWindow.actionStayOnTop.setChecked(stayOnTop)
+        self.mainWindow.ui.actionStayOnTop.toggled.connect(self.setWindowStayOnTop)
+        self.mainWindow.ui.actionStayOnTop.setChecked(stayOnTop)
         promptBeforeQuit = bool(int(self.settings.value('mainwindow/promptBeforeQuit', 1)))
-        self.mainWindow.actionPromptBeforeQuit.toggled.connect(self.setPromptBeforeQuit)
-        self.mainWindow.actionPromptBeforeQuit.setChecked(promptBeforeQuit)
+        self.mainWindow.ui.actionPromptBeforeQuit.toggled.connect(self.setPromptBeforeQuit)
+        self.mainWindow.ui.actionPromptBeforeQuit.setChecked(promptBeforeQuit)
         # Main window is ready, so show it
         self.mainWindow.init(self, self.networkChannel, self.dataManager)
         self._initWidgets()
@@ -273,13 +278,13 @@ class PyPipboyApp(QtWidgets.QApplication):
                 host = self.settings.value('mainwindow/lasthost')
             if self.settings.value('mainwindow/lastport'):
                 port = self.settings.value('mainwindow/lastport')
-            connectDialog.hostInput.setText(host)
-            connectDialog.portInput.setText(str(port))
+            connectDialog.ui.hostInput.setText(host)
+            connectDialog.ui.portInput.setText(str(port))
             if connectDialog.exec():
                 try:
-                    host = connectDialog.hostInput.text()
-                    port = int(connectDialog.portInput.text())
-                    retry = connectDialog.retryCheckbox.isChecked()
+                    host = connectDialog.ui.hostInput.text()
+                    port = int(connectDialog.ui.portInput.text())
+                    retry = connectDialog.ui.retryCheckbox.isChecked()
                     #self.signalConnectToHost.emit(host, port, retry)
                     self.connectToHost(host, port, retry)
                 except ValueError as e:
@@ -457,11 +462,11 @@ class PyPipboyApp(QtWidgets.QApplication):
         self._logger.info('Connection State Changed: ' + str(state) + ' - ' + str(errstatus) + ' - ' + str(errmsg))
         if state: # connect
             # menu management stuff
-            self.mainWindow.actionConnect.setEnabled(False)
-            self.mainWindow.actionConnectTo.setEnabled(False)
-            self.mainWindow.actionDisconnect.setEnabled(True)
-            self.mainWindow.actionExportData.setEnabled(True)
-            self.mainWindow.actionImportData.setEnabled(False)
+            self.mainWindow.ui.actionConnect.setEnabled(False)
+            self.mainWindow.ui.actionConnectTo.setEnabled(False)
+            self.mainWindow.ui.actionDisconnect.setEnabled(True)
+            self.mainWindow.ui.actionExportData.setEnabled(True)
+            self.mainWindow.ui.actionImportData.setEnabled(False)
             # status bar update
             tmp = str(self.networkChannel.hostAddr) + ':' + str(self.networkChannel.hostPort) + ' ('
             tmp += 'Version: ' + str(self.networkChannel.hostVersion) + ", "
@@ -473,11 +478,11 @@ class PyPipboyApp(QtWidgets.QApplication):
             
         else: # disconnect
             # menu management stuff
-            self.mainWindow.actionConnect.setEnabled(True)
-            self.mainWindow.actionConnectTo.setEnabled(True)
-            self.mainWindow.actionDisconnect.setEnabled(False)
-            self.mainWindow.actionExportData.setEnabled(False)
-            self.mainWindow.actionImportData.setEnabled(True)
+            self.mainWindow.ui.actionConnect.setEnabled(True)
+            self.mainWindow.ui.actionConnectTo.setEnabled(True)
+            self.mainWindow.ui.actionDisconnect.setEnabled(False)
+            self.mainWindow.ui.actionExportData.setEnabled(False)
+            self.mainWindow.ui.actionImportData.setEnabled(True)
             # status bar update
             self.mainWindow.connectionStatusLabel.setText('No Connection')
             # error handling
@@ -552,7 +557,7 @@ class PyPipboyApp(QtWidgets.QApplication):
         for dir in os.listdir(self.PROGRAM_WIDGETS_DIR):
             dirpath = os.path.join(self.PROGRAM_WIDGETS_DIR, dir)
             if dir != 'shared' and not dir.startswith('__') and os.path.isdir(dirpath):
-                self._logger.debug('Tyring to load widget "' + dir + '"')
+                self._logger.debug('Trying to load widget "' + dir + '"')
                 module = None
                 try:
                     module = importlib.import_module(self.PROGRAM_WIDGETS_DIR + '.' + dir + '.info')
@@ -632,7 +637,7 @@ class PyPipboyApp(QtWidgets.QApplication):
         for dir in os.listdir(self.PROGRAM_STYLES_DIR):
             dirpath = os.path.join(self.PROGRAM_STYLES_DIR, dir)
             if not dir.startswith('__') and dir != 'default' and os.path.isdir(dirpath):
-                self._logger.debug('Tyring to add style "' + dir + '"')
+                self._logger.debug('Trying to add style "' + dir + '"')
                 stylefile = os.path.join(dirpath, 'style.qss')
                 if os.path.isfile(stylefile):
                     style = ApplicationStyle(self, dir, dirpath)
@@ -640,14 +645,14 @@ class PyPipboyApp(QtWidgets.QApplication):
                     self._logger.info('Added style "' + dir + '"')
                 else:
                     self._logger.warn('Could not add style "' + dir + '": No style.qss found')
-        menu = self.mainWindow.menuStyles
+        menu = self.mainWindow.ui.menuStyles
         def _genSlotSetStyles(app, name):
             return lambda : app.setStyle(name)
         for s in self.styles:
             action = menu.addAction(self.styles[s].name)
             action.triggered.connect(_genSlotSetStyles(self, self.styles[s].name))
             action.setCheckable(True)
-        self.mainWindow.actionStylesDefault.triggered.connect(_genSlotSetStyles(self, 'default'))
+        self.mainWindow.ui.actionStylesDefault.triggered.connect(_genSlotSetStyles(self, 'default'))
         if (self.settings.value('mainwindow/lastStyle')):
             self.setStyle(self.settings.value('mainwindow/lastStyle'))
         else:
@@ -663,14 +668,14 @@ class PyPipboyApp(QtWidgets.QApplication):
             stylefilepath = os.path.join(style.styledir, 'style.qss')
             self.setStyleSheet('file:///' + stylefilepath)
         actionFound = False
-        for a in self.mainWindow.menuStyles.actions():
+        for a in self.mainWindow.ui.menuStyles.actions():
             if a.text() == name:
                 a.setChecked(True)
                 actionFound = True
             else:
                 a.setChecked(False)
         if not actionFound:
-            self.mainWindow.actionStylesDefault.setChecked(True)
+            self.mainWindow.ui.actionStylesDefault.setChecked(True)
         self.settings.setValue('mainwindow/lastStyle', name) 
         
            

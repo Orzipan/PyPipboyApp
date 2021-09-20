@@ -3,8 +3,10 @@
 
 import datetime
 import os
-from PyQt5 import QtWidgets, QtCore, uic
+from PyQt5 import QtWidgets, QtCore
+from PyQt5.QtWidgets import QWidget
 from .. import widgets
+from .ui_datetimewidget import Ui_DateTime
 
 
 class DateTimeWidget(widgets.WidgetBase):
@@ -12,7 +14,9 @@ class DateTimeWidget(widgets.WidgetBase):
     
     def __init__(self, mhandle, parent):
         super().__init__('Date/Time', parent)
-        self.widget = uic.loadUi(os.path.join(mhandle.basepath, 'ui', 'datetimewidget.ui'))
+        self.widget = QWidget()
+        self.widget.ui = Ui_DateTime()
+        self.widget.ui.setupUi(self.widget)
         self.setWidget(self.widget)
         self.pipPlayerInfo = None
         self.dateYear = 0
@@ -20,15 +24,15 @@ class DateTimeWidget(widgets.WidgetBase):
         self.dateDay = 0
         self.timeHour = 0
         self.timeMin = 0
-        self.realClockTimer = QtCore.QTimer()
-        self.realClockTimer.timeout.connect(self._realClockUpdate)
+        self.widget.realClockTimer = QtCore.QTimer()
+        self.widget.realClockTimer.timeout.connect(self._realClockUpdate)
         self._signalInfoUpdated.connect(self._slotInfoUpdated)
         
     def init(self, app, datamanager):
         super().init(app, datamanager)
         self.dataManager = datamanager
         self._realClockUpdate()
-        self.realClockTimer.start(1000)
+        self.widget.realClockTimer.start(1000)
         self.dataManager.registerRootObjectListener(self._onPipRootObjectEvent)
         
     def _onPipRootObjectEvent(self, rootObject):
@@ -44,7 +48,7 @@ class DateTimeWidget(widgets.WidgetBase):
     def _realClockUpdate(self):
         realTime = datetime.datetime.now()
         realHour = realTime.strftime('%I').lstrip('0')
-        self.widget.realTimeLabel.setText(realTime.strftime(realHour + ':%M %p'))
+        self.widget.ui.realTimeLabel.setText(realTime.strftime(realHour + ':%M %p'))
         
     @QtCore.pyqtSlot()
     def _slotInfoUpdated(self):
@@ -78,6 +82,6 @@ class DateTimeWidget(widgets.WidgetBase):
         gameDate += str(self.dateYear)
         gameTime = datetime.time(int(self.timeHour), self.timeMin)
         gameHour = gameTime.strftime('%I').lstrip('0')
-        self.widget.gameTimeLabel.setText(gameTime.strftime(gameHour + ':%M %p'))
-        self.widget.gameDateLabel.setText(gameDate)
+        self.widget.ui.gameTimeLabel.setText(gameTime.strftime(gameHour + ':%M %p'))
+        self.widget.ui.gameDateLabel.setText(gameDate)
         

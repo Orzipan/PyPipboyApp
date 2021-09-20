@@ -1,5 +1,5 @@
 import os
-from PyQt5 import QtCore, QtGui, QtWidgets, uic
+from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
@@ -8,6 +8,7 @@ from pypipboy import inventoryutils
 from widgets.shared import settings
 from ..shared.graphics import ImageFactory
 from ..shared.PipboyIcon import PipboyIcon
+from .ui_ammocountwidget import Ui_AmmoCountWidget
 from os import path
 
 GlobalImageLoader2 = ImageFactory(path.join("widgets", "shared", "res"))
@@ -17,12 +18,14 @@ class AmmoCountWidget(widgets.WidgetBase):
 
     def __init__(self, mhandle, parent):
         super().__init__("Ammo Count", parent)
-        self.widget  = uic.loadUi(os.path.join(mhandle.basepath, "ui", "ammocountwidget.ui"))
+        self.widget = QWidget()
+        self.widget.ui = Ui_AmmoCountWidget()
+        self.widget.ui.setupUi(self.widget)
         self.setWidget( self.widget)
         self._signalInfoUpdated.connect(self._slotInfoUpdated)
         self.AmmoListModel = QStandardItemModel()
         self.ammoWatchListModel = QStandardItemModel()
-        self.widget.ammoList.setModel(self.AmmoListModel) # we need to call setModel() before selectionModel() (and never afterwards)
+        self.widget.ui.ammoList.setModel(self.AmmoListModel) # we need to call setModel() before selectionModel() (and never afterwards)
         self.AmmoListModel.itemChanged.connect(self.on_item_changed)
         self.ammoNameLabelDict = {}
         self.ammoNumberLabelDict = {}
@@ -38,8 +41,8 @@ class AmmoCountWidget(widgets.WidgetBase):
         self.AmmoWatchList = self._app.settings.value('ammocount/savedAmmoWatchList', [])
         if not self.AmmoWatchList: # QSettings are buggy on Linux
             self.AmmoWatchList = []
-        settings.setSplitterState(self.widget.splitter, self._app.settings.value('ammocount/splitterState2', None))
-        self.widget.splitter.splitterMoved.connect(self._slotSplitterMoved)
+        settings.setSplitterState(self.widget.ui.splitter, self._app.settings.value('ammocount/splitterState2', None))
+        self.widget.ui.splitter.splitterMoved.connect(self._slotSplitterMoved)
         self.setAmmoWatch()
         
     def getMenuCategory(self):
@@ -125,13 +128,13 @@ class AmmoCountWidget(widgets.WidgetBase):
 
                 item[1].setData(QtCore.Qt.AlignCenter, QtCore.Qt.TextAlignmentRole)
                 self.ammoWatchListModel.appendRow(item)
-            self.widget.ammoTableView.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeToContents)
-            self.widget.ammoTableView.verticalHeader().setSectionResizeMode(QHeaderView.Fixed)
-            self.widget.ammoTableView.verticalHeader().setStretchLastSection(False)
-            self.widget.ammoTableView.horizontalHeader().setStretchLastSection(True)
-            self.widget.ammoTableView.setModel(self.ammoWatchListModel)
-
-            self.widget.ammoTableView.sortByColumn(0, QtCore.Qt.AscendingOrder)
+            self.widget.ui.ammoTableView.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeToContents)
+            self.widget.ui.ammoTableView.verticalHeader().setSectionResizeMode(QHeaderView.Fixed)
+            self.widget.ui.ammoTableView.verticalHeader().setStretchLastSection(False)
+            self.widget.ui.ammoTableView.horizontalHeader().setStretchLastSection(True)
+            self.widget.ui.ammoTableView.setModel(self.ammoWatchListModel)
+            
+            self.widget.ui.ammoTableView.sortByColumn(0, QtCore.Qt.AscendingOrder)
 
 
 

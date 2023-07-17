@@ -34,7 +34,7 @@
       </font>
      </property>
      <property name="text">
-      <string>STIMPAK (0)</string>
+      <string>Stimpak</string>
      </property>
     </widget>
    </item>
@@ -58,7 +58,7 @@
       </font>
      </property>
      <property name="text">
-      <string>RADAWAY (0)</string>
+      <string>RadAway</string>
      </property>
     </widget>
    </item>

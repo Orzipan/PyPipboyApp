@@ -1,0 +1,16 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+playsound = "*"
+pywin32 = {version = "*", os_name = "=='nt'"}
+pypipboy = {ref = "master", git = "git://github.com/silentspud/PyPipboy.git"}
+PyQt5 = "*"
+
+[dev-packages]
+py-make = "*"
+
+[requires]
+python_version = "3"

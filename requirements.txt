@@ -1,0 +1,4 @@
+PyQt5
+playsound
+pywin32
+PyPipboy @ git+git://github.com/silentspud/PyPipboy.git

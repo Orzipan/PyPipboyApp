@@ -3,12 +3,13 @@
 
 import queue
 import os
-from PyQt5 import QtWidgets, uic, QtCore
+from PyQt5 import QtWidgets, QtCore
+from PyQt5.QtWidgets import QTreeView, QWidget
 from pypipboy.types import eValueType
 from pypipboy.datamanager import eValueUpdatedEventType
 from widgets import widgets
 from widgets.shared import settings
-
+from .ui_databrowser import Ui_DataBrowser
 
 
 class DataBrowserTreeModel(QtCore.QAbstractItemModel):
@@ -49,7 +50,7 @@ class DataBrowserTreeModel(QtCore.QAbstractItemModel):
             
         
     def headerData(self, section, orientation, role):
-        if orientation == QtCore.Qt.Horizontal and role == QtCore.Qt.DisplayRole:
+        if orientation == QtCore.Qt.Orientation.Horizontal and role == QtCore.Qt.ItemDataRole.DisplayRole:
             if section == 0:
                 return "Record"
             elif section == 1:
@@ -149,7 +150,10 @@ class DataBrowserTreeModel(QtCore.QAbstractItemModel):
 class DataBrowserWidget(widgets.WidgetBase):
     def __init__(self, mhandle, parent):
         super().__init__('Data Browser', parent)
-        self.widget = uic.loadUi(os.path.join(mhandle.basepath, 'ui', 'databrowser.ui'))
+        self.widget = QWidget()
+        self.widget.treeView = QTreeView()
+        self.widget.ui = Ui_DataBrowser()
+        self.widget.ui.setupUi(self.widget)
         self.setWidget(self.widget)
         
     def init(self, app, datamanager):

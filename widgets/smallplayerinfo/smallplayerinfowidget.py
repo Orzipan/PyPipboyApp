@@ -122,7 +122,7 @@ class SmallPlayerInfoWidget(widgets.WidgetBase):
         self.widget.radChangeLabel.setText(radChangePrefix + str(round(radChange)))
         self.widget.lblActiveEffects.setText(listEffectsSeperator.join(listEffects))
         
-        currentRadioStationName = 'Radio off'
+        currentRadioStationName = 'Off'
         if(self.pipRadioInfo):
             for i in range(0, self.pipRadioInfo.childCount()):
                 station = self.pipRadioInfo.child(i)

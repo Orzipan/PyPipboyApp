@@ -3,7 +3,8 @@
 
 import datetime
 import os
-from PyQt5 import QtWidgets, QtCore, uic
+from widgets.dataupdatelogger.ui_dataupdatelogger import Ui_DataUpdateLogger
+from PyQt5 import QtWidgets, QtCore
 from pypipboy.types import eValueType
 from pypipboy.datamanager import eValueUpdatedEventType
 from .. import widgets
@@ -14,12 +15,13 @@ class DataUpdateLoggerWidget(widgets.WidgetBase):
     
     def __init__(self, mhandle, parent):
         super().__init__('Data Update Logger', parent)
-        self.widget = uic.loadUi(os.path.join(mhandle.basepath, 'ui', 'dataupdatelogger.ui'))
+        self.widget.ui = Ui_DataUpdateLogger()
+        self.widget.ui.setupUi(self.widget)
         self.setWidget(self.widget)
         self._signalPrintToLog.connect(self._slotPrintToLog)
-        self.widget.clearButton.clicked.connect(self._slotClearLog)
-        self.widget.enableCheckBox.stateChanged.connect(self._slotEnableLogging)
-        self.widget.logTextEdit.setMaximumBlockCount(10000)
+        self.widget.ui.clearButton.clicked.connect(self._slotClearLog)
+        self.widget.ui.enableCheckBox.stateChanged.connect(self._slotEnableLogging)
+        self.widget.ui.logTextEdit.setMaximumBlockCount(10000)
         
     def init(self, app, datamanager):
         super().init(app, datamanager)
@@ -32,13 +34,14 @@ class DataUpdateLoggerWidget(widgets.WidgetBase):
     
     @QtCore.pyqtSlot(str)
     def _slotPrintToLog(self, msg):
-        self.widget.logTextEdit.appendPlainText(str(datetime.datetime.now()) + ': ' + msg)
+        self.widget.ui.logTextEdit.appendPlainText(str(datetime.datetime.now()) + ': ' + msg)
         
     @QtCore.pyqtSlot()
     def _slotClearLog(self):
-        self.widget.logTextEdit.clear()
+        self.widget.ui.logTextEdit.clear()
         
     @QtCore.pyqtSlot(bool)
+    @QtCore.pyqtSlot(int)
     def _slotEnableLogging(self, value):
         if value:
             self.networkchannel.registerConnectionListener(self._onConnectionStateChange)
@@ -60,7 +63,7 @@ class DataUpdateLoggerWidget(widgets.WidgetBase):
                 self._signalPrintToLog.emit('Connection Lost.')
                 
     def _onRootObjectEvent(self, rootObject):
-        self.widget.logTextEdit.appendPlainText('Root Object resetted.')
+        self.widget.ui.logTextEdit.appendPlainText('Root Object resetted.')
         
     
     def _onValueUpdatedEvent(self, value, eventtype):

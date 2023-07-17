@@ -1,6 +1,9 @@
 import os
 import logging
-from PyQt5 import QtCore, uic
+
+from PyQt5.QtWidgets import QWidget
+from widgets.autodoc.ui_autodocwidget import Ui_autodocWidget
+from PyQt5 import QtCore
 from widgets import widgets
 from .autodocsettingsdialog import AutoDocSettingsDialog
 
@@ -63,7 +66,7 @@ class AutoDocWidget(widgets.WidgetBase):
     UIUpdateSignal = QtCore.pyqtSignal()
     AutoDocSignal = QtCore.pyqtSignal()
     
-    Widgets = None
+    Widgets = QWidget()
     Logger = None
     Settings = None
     
@@ -105,13 +108,14 @@ class AutoDocWidget(widgets.WidgetBase):
         
         self.Logger = logging.getLogger("pypipboyapp.widgets.autodoc")
         
-        self.Widgets = uic.loadUi(os.path.join(mhandle.basepath, "ui", "autodocwidget.ui"))
+        self.Widgets.ui = Ui_autodocWidget()
+        self.Widgets.ui.setupUi(self.Widgets)
         self.setWidget(self.Widgets)
         
         self.UIUpdateSignal.connect(self.UpdateUI)
         self.AutoDocSignal.connect(self.RunAutoDoc)
         
-        self.Widgets.openSettingsButton.clicked.connect(self.OpenSettingsButtonClicked)
+        self.Widgets.ui.openSettingsButton.clicked.connect(self.OpenSettingsButtonClicked)
         
         self.Stimpak.connect(self.UseAidItem)
         self.MedX.connect(self.UseAidItem)
@@ -320,9 +324,9 @@ class AutoDocWidget(widgets.WidgetBase):
                 
             Output += "]\n"
             
-            self.Widgets.watcherLabel.setText(Output)
+            self.Widgets.ui.watcherLabel.setText(Output)
         else:
-            self.Widgets.watcherLabel.setText("The Auto Doc has been turned off!")
+            self.Widgets.ui.watcherLabel.setText("The Auto Doc has been turned off!")
         
 ########################
 ###                  ###

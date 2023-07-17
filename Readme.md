@@ -20,7 +20,6 @@ Currently implemented features are:
  - Support for keeping track of collectibles (Magazines and Bobble-Heads).
  - Resizable map markers.
  - Hotkey support on Windows.
- - Support for chaining several application instances together (relay mode).
  - Data import/export.
  - Automatic version check.
  - Currently available widgets:

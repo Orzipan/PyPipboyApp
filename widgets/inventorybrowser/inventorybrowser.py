@@ -74,10 +74,10 @@ class InventoryBrowserWidget(widgets.WidgetBase):
             tab.tableView.sortByColumn(proxyModel.sortColumn, QtCore.Qt.DescendingOrder)
         else:
             tab.tableView.sortByColumn(proxyModel.sortColumn, QtCore.Qt.AscendingOrder)
-        @QtCore.pyqtSlot(int, int, int)
-        def _slotSectionResized(logicalIndex, oldSize, newSize):
-            self.app.settings.setValue(skeySizes, settings.getHeaderSectionSizes(tableHeader))
-        tableHeader.sectionResized.connect(_slotSectionResized)
+        #@QtCore.pyqtSlot(int, int, int)
+        #def _slotSectionResized(logicalIndex, oldSize, newSize):
+        #    self.app.settings.setValue(skeySizes, settings.getHeaderSectionSizes(tableHeader))
+        #tableHeader.sectionResized.connect(_slotSectionResized)
         @QtCore.pyqtSlot(int, int, int)
         def _slotSectionMoved(logicalIndex, oldVisualIndex, newVisualIndex):
             self.app.settings.setValue(skeyMoved, settings.getHeaderSectionVisualIndices(tableHeader))

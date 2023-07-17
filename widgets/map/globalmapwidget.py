@@ -1535,7 +1535,7 @@ class GlobalMapWidget(widgets.WidgetBase):
         self.mapMarkerSize = size
         self.signalSetMarkerSize.emit(size)
 
-    @QtCore.pyqtSlot(int)
+    @QtCore.pyqtSlot(float)
     def _slotMarkerSizeSpinboxTriggered (self,size):
         self.widget.markerSizeSlider.blockSignals(True)
         self.widget.markerSizeSlider.setValue(size)
@@ -1544,30 +1544,30 @@ class GlobalMapWidget(widgets.WidgetBase):
         self._app.settings.setValue('globalmapwidget/mapMarkerSize', size)
         self.signalSetMarkerSize.emit(size)
 
-    @QtCore.pyqtSlot(bool)
+    @QtCore.pyqtSlot(int)
     def _slotStickyLabelsTriggered(self, value):
         self.stickyLabelsEnabled = value
         self._app.settings.setValue('globalmapwidget/stickyLabels', int(value))
         self.signalSetStickyLabel.emit(value)
         
-    @QtCore.pyqtSlot(bool)        
+    @QtCore.pyqtSlot(int)
     def _slotPowerMarkerEnableTriggered(self, value):
         self.powerArmorMarker.filterSetVisible(value)
         self._app.settings.setValue('globalmapwidget/powerArmourMarker', int(value))
         
-    @QtCore.pyqtSlot(bool)        
+    @QtCore.pyqtSlot(int)
     def _slotLocationEnableTriggered(self, value):
         self.locationFilterEnableFlag = value
         self._app.settings.setValue('globalmapwidget/locationMarker', int(value))
         self.signalLocationFilterSetVisible.emit(value)
         
-    @QtCore.pyqtSlot(bool)        
+    @QtCore.pyqtSlot(int)
     def _slotLocationVisibilityCheatTriggered(self, value):
         self.locationVisibilityCheatFlag = value
         self._app.settings.setValue('globalmapwidget/locationVisibilityCheat', int(value))
         self.signalLocationFilterVisibilityCheat.emit(value)
-        
-    @QtCore.pyqtSlot(bool)        
+             
+    @QtCore.pyqtSlot(int) 
     def _slotCenterOnPlayerCheckToggled(self, value):
         self.centerOnPlayerEnabled = value
         self._app.settings.setValue('globalmapwidget/centerPlayer', int(value))
@@ -1631,6 +1631,7 @@ class GlobalMapWidget(widgets.WidgetBase):
 
 
     @QtCore.pyqtSlot(bool)
+    @QtCore.pyqtSlot(int)
     def _slotMapColorAutoModeTriggered(self, value):
         self._app.settings.setValue('globalmapwidget/autoColour', int(value))
         if self.pipMapObject:

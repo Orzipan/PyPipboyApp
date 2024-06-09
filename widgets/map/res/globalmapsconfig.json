@@ -41,5 +41,26 @@
 		"nw": [-58, 454],
 		"ne": [3852, 454],
 		"sw": [-58, 4350]
+	}, "nukaworld": {
+		"label": "Nuka World",
+		"colorable": true,
+		"file": "NukaWorldMap.png",
+		"nw": [-1080, -543],
+		"ne": [3020, -543],
+		"sw": [-1080, 3600]
+	}, "farharbor": {
+		"label": "Far Harbor",
+		"colorable": true,
+		"file": "MapFarHarbor.png",
+		"nw": [69, 69],
+		"ne": [1979, 69],
+		"sw": [69, 1979]
+	}, "nukaworldx": {
+		"label": "Nuka World",
+		"colorable": true,
+		"file": "NukaWorldMap.png",
+		"nw": [-1080, -455],
+		"ne": [3020, -455],
+		"sw": [-1080, 3500]
 	}
 }

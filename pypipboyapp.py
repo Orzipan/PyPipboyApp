@@ -32,6 +32,8 @@ class ApplicationStyle(QtCore.QObject):
 class PipboyMainWindow(QtWidgets.QMainWindow):
     # Signal that is emitted when the application should be closed.
     signalWantsToQuit = QtCore.pyqtSignal()
+
+    actionAuto_Connect_on_Start_up = QtWidgets.QAction()
     
     # Constructor
     def __init__(self, parent = None):
@@ -40,9 +42,9 @@ class PipboyMainWindow(QtWidgets.QMainWindow):
         self.ui.setupUi(self)
         self.connectionStatusLabel = QtWidgets.QLabel("No Connection")
         self.ui.statusbar.addPermanentWidget(self.connectionStatusLabel)
-        self.setCentralWidget(None) # damn thing cannot be removed in Qt-Designer
+        self.setCentralWidget(None) # type: ignore # damn thing cannot be removed in Qt-Designer
         self.setDockNestingEnabled(True)
-        self.setTabPosition(QtCore.Qt.AllDockWidgetAreas, QtWidgets.QTabWidget.North)
+        self.setTabPosition(QtCore.Qt.DockWidgetArea.AllDockWidgetAreas, QtWidgets.QTabWidget.North)
         
     # Init function that is called after everything has been set up
     def init(self, app, networkchannel, datamanager):
@@ -50,7 +52,7 @@ class PipboyMainWindow(QtWidgets.QMainWindow):
             self.ui.actionFullscreen.setChecked(True)
         else:
             self.ui.actionFullscreen.setChecked(False)
-        self.ui.actionFullscreen.toggled.connect(self.setFullscreen)
+        self.ui.actionFullscreen.toggled.connect(self.setFullscreen) # type: ignore
         
     def closeEvent(self, event):
         event.ignore() # We do our own shutdown handling
@@ -67,7 +69,6 @@ class PipboyMainWindow(QtWidgets.QMainWindow):
 
 # Main application class
 class PyPipboyApp(QtWidgets.QApplication):
-    
     PROGRAM_NAME = 'PyPipboyApp'
     PROGRAM_VERSION_MAJOR = 0
     PROGRAM_VERSION_MINOR = 0
@@ -79,6 +80,10 @@ class PyPipboyApp(QtWidgets.QApplication):
     PROGRAM_WIDGETS_DIR = 'widgets'
     PROGRAM_STYLES_DIR = 'styles'
     
+    _autodiscoverHosts: 'list[str]'
+    _autodiscoverThread: QtCore.QThread
+    _checkVersionThread: threading.Thread
+
     # public signals
     signalConnectToHost = QtCore.pyqtSignal(str, int, bool)
     signalShowWarningMessage = QtCore.pyqtSignal(str, str)
@@ -105,31 +110,31 @@ class PyPipboyApp(QtWidgets.QApplication):
         QtCore.QCoreApplication.setApplicationName("PyPipboyApp")
         if inifile:
             self._logger.info('Using ini-file "' + str(inifile) + '".')
-            self.settings = QtCore.QSettings(inifile, QtCore.QSettings.IniFormat)
+            self.settings = QtCore.QSettings(inifile, QtCore.QSettings.Format.IniFormat)
         elif platform.system() == 'Windows':
-            self.settings = QtCore.QSettings(QtCore.QSettings.IniFormat, QtCore.QSettings.UserScope, "PyPipboyApp", "PyPipboyApp")
+            self.settings = QtCore.QSettings(QtCore.QSettings.Format.IniFormat, QtCore.QSettings.Scope.UserScope, "PyPipboyApp", "PyPipboyApp")
             # If there are no settings, copy existing settings from registry
             if len(self.settings.allKeys()) <= 0:
-                registrySettings = QtCore.QSettings(QtCore.QSettings.NativeFormat, QtCore.QSettings.UserScope, "PyPipboyApp", "PyPipboyApp")
+                registrySettings = QtCore.QSettings(QtCore.QSettings.Format.NativeFormat, QtCore.QSettings.Scope.UserScope, "PyPipboyApp", "PyPipboyApp")
                 for k in registrySettings.allKeys():
                     self.settings.setValue(k, registrySettings.value(k))
                     #registrySettings.remove(k)
                 #registrySettings.sync()
         else: 
             # Non-Windows OS already use the ini-format, they just use another file-extension. That's why we stick with nativeFormat.
-            self.settings = QtCore.QSettings(QtCore.QSettings.NativeFormat, QtCore.QSettings.UserScope, "PyPipboyApp", "PyPipboyApp")
+            self.settings = QtCore.QSettings(QtCore.QSettings.Format.NativeFormat, QtCore.QSettings.Scope.UserScope, "PyPipboyApp", "PyPipboyApp")
         
         # Init PyPipboy communication layer
         self.dataManager = PipboyDataManager()
         self.networkChannel = self.dataManager.networkchannel
         self.networkChannel.registerConnectionListener(self._onConnectionStateChange)
         # Connect internal signals
-        self._signalAutodiscoveryFinished.connect(self._slotAutodiscoveryFinished)
-        self.signalConnectToHost.connect(self.connectToHost)
-        self._signalConnectToHostFinished.connect(self._slotConnectToHostFinished)
-        self.signalShowWarningMessage.connect(self.showWarningMessage)
-        self.signalRequestQuit.connect(self.requestQuit)
-        self._signalFinishedCheckVersion.connect(self._slotFinishedCheckVersion)
+        self._signalAutodiscoveryFinished.connect(self._slotAutodiscoveryFinished) # type: ignore
+        self.signalConnectToHost.connect(self.connectToHost) # type: ignore
+        self._signalConnectToHostFinished.connect(self._slotConnectToHostFinished) # type: ignore
+        self.signalShowWarningMessage.connect(self.showWarningMessage) # type: ignore
+        self.signalRequestQuit.connect(self.requestQuit) # type: ignore
+        self._signalFinishedCheckVersion.connect(self._slotFinishedCheckVersion) # type: ignore
         self._connectHostMessageBox = None
         self._connectHostThread = None
         self._iwcEndpoints = dict()
@@ -163,7 +168,7 @@ class PyPipboyApp(QtWidgets.QApplication):
         self.helpWidget.ui = Ui_HelpWidget()
         self.helpWidget.ui.setupUi(self.helpWidget)
         self.helpWidget.ui.textBrowser.setSource(QtCore.QUrl.fromLocalFile(os.path.join('ui', 'res', 'helpwidget.html')))
-        self.mainWindow.addDockWidget(QtCore.Qt.TopDockWidgetArea, self.helpWidget)
+        self.mainWindow.addDockWidget(QtCore.Qt.DockWidgetArea.TopDockWidgetArea, self.helpWidget)
         self._loadWidgets()
         # Restore saved window state
         savedFullScreen = bool(int(self.settings.value('mainwindow/fullscreen', 0)))
@@ -180,22 +185,22 @@ class PyPipboyApp(QtWidgets.QApplication):
         menuActions = self.mainWindow.menuBar().actions()
         self.mainWindow.menuBar().insertMenu(menuActions[len(menuActions)-1], self.widgetMenu)
         # connect with main window
-        self.mainWindow.ui.actionConnect.triggered.connect(self.startAutoDiscovery)
-        self.mainWindow.ui.actionConnectTo.triggered.connect(self.showConnectToDialog)
-        self.mainWindow.ui.actionDisconnect.triggered.connect(self.disconnect)
-        self.mainWindow.ui.actionQuit.triggered.connect(self.requestQuit)
-        self.mainWindow.signalWantsToQuit.connect(self.requestQuit)
+        self.mainWindow.ui.actionConnect.triggered.connect(self.startAutoDiscovery) # type: ignore
+        self.mainWindow.ui.actionConnectTo.triggered.connect(self.showConnectToDialog) # type: ignore
+        self.mainWindow.ui.actionDisconnect.triggered.connect(self.disconnect) # type: ignore
+        self.mainWindow.ui.actionQuit.triggered.connect(self.requestQuit) # type: ignore
+        self.mainWindow.signalWantsToQuit.connect(self.requestQuit) # type: ignore
         self.mainWindow.ui.actionShowAbout.triggered.connect(self.showAboutDialog)
         self.mainWindow.ui.actionShowAboutQt.triggered.connect(self.aboutQt)
-        self.mainWindow.ui.actionAuto_Connect_on_Start_up.triggered.connect(self.autoConnectToggled)
-        self.mainWindow.ui.actionExportData.triggered.connect(self.exportData)
-        self.mainWindow.ui.actionImportData.triggered.connect(self.importData)
-        self.mainWindow.ui.actionVersionCheck.triggered.connect(self.startVersionCheckVerbose)
+        self.mainWindow.ui.actionAuto_Connect_on_Start_up.triggered.connect(self.autoConnectToggled) # type: ignore
+        self.mainWindow.ui.actionExportData.triggered.connect(self.exportData) # type: ignore
+        self.mainWindow.ui.actionImportData.triggered.connect(self.importData) # type: ignore
+        self.mainWindow.ui.actionVersionCheck.triggered.connect(self.startVersionCheckVerbose) # type: ignore
         stayOnTop = bool(int(self.settings.value('mainwindow/stayOnTop', 0)))
-        self.mainWindow.ui.actionStayOnTop.toggled.connect(self.setWindowStayOnTop)
+        self.mainWindow.ui.actionStayOnTop.toggled.connect(self.setWindowStayOnTop) # type: ignore
         self.mainWindow.ui.actionStayOnTop.setChecked(stayOnTop)
         promptBeforeQuit = bool(int(self.settings.value('mainwindow/promptBeforeQuit', 1)))
-        self.mainWindow.ui.actionPromptBeforeQuit.toggled.connect(self.setPromptBeforeQuit)
+        self.mainWindow.ui.actionPromptBeforeQuit.toggled.connect(self.setPromptBeforeQuit) # type: ignore
         self.mainWindow.ui.actionPromptBeforeQuit.setChecked(promptBeforeQuit)
         # Main window is ready, so show it
         self.mainWindow.init(self, self.networkChannel, self.dataManager)
@@ -259,7 +264,7 @@ class PyPipboyApp(QtWidgets.QApplication):
             self._autodiscoverMessageBox = None
         # Wait for thread before deleting it
         self._autodiscoverThread.wait()
-        self._autodiscoverThread = None
+        # not sure what this would do self._autodiscoverThread = None
         # Let the user select a host
         selectDialog = SelectHostDialog(self.mainWindow)
         if selectDialog.exec(self._autodiscoverHosts):
@@ -296,7 +301,7 @@ class PyPipboyApp(QtWidgets.QApplication):
     # connect to specified host (non blocking)
     # connect happens in its own thread
     # returns true when the thread was successfully started
-    @QtCore.pyqtSlot(str, int, bool)        
+    # @QtCore.pyqtSlot(str, int, bool)        
     def connectToHost(self, host, port, retry = False,  busydialog= True):
         if not self.networkChannel.isConnected:
             self._logger.info('Connecting to host ' + host + ':' + str(port) + ' Retry=' + str(retry))
@@ -306,7 +311,7 @@ class PyPipboyApp(QtWidgets.QApplication):
                 self._connectHostMessageBox.setWindowTitle('Connecting')
                 self._connectHostMessageBox.setText('Connecting to host, please wait.')
                 self._connectHostMessageBox.setStandardButtons(QtWidgets.QMessageBox.Cancel)
-                self._connectHostMessageBox.buttonClicked.connect(self.cancelConnectToHost)
+                self._connectHostMessageBox.buttonClicked.connect(self.cancelConnectToHost) # type: ignore
                 self._connectHostMessageBox.show()
             else:
                 self._connectHostMessageBox = None
@@ -372,12 +377,12 @@ class PyPipboyApp(QtWidgets.QApplication):
             QtWidgets.QMessageBox.warning(self.mainWindow, 'Connection to host failed', msg)
                 
     # Shows a warning message dialog
-    @QtCore.pyqtSlot(str, str)        
+    # @QtCore.pyqtSlot(str, str)        
     def showWarningMessage(self, title, text):
             QtWidgets.QMessageBox.warning(self.mainWindow, title, text)
     
     # Shows a info message dialog
-    @QtCore.pyqtSlot(str, str)        
+    #@QtCore.pyqtSlot(str, str)        
     def showInfoMessage(self, title, text):
             QtWidgets.QMessageBox.information(self.mainWindow, title, text)
     
@@ -486,14 +491,24 @@ class PyPipboyApp(QtWidgets.QApplication):
             # status bar update
             self.mainWindow.connectionStatusLabel.setText('No Connection')
             # error handling
-            if errstatus != 0:
+            if errstatus != 0 and errstatus != -2: # -2 is ConnectionResetError
                 self.signalShowWarningMessage.emit('Connection Error', 'Connection Error: ' + str(errmsg))
+            if errstatus == -2:
+                if int(self.settings.value('mainwindow/autoconnect', 0)):
+                    self.mainWindow.actionAuto_Connect_on_Start_up.setChecked(True)
+                    host = 'localhost'
+                    port = 27000
+                    if self.settings.value('mainwindow/lasthost'):
+                        host = self.settings.value('mainwindow/lasthost')
+                    if self.settings.value('mainwindow/lastport'):
+                        port = int(self.settings.value('mainwindow/lastport'))
+                    self.signalConnectToHost.emit(host, port, True)
                 
     @QtCore.pyqtSlot()
     def startVersionCheckVerbose(self):
         self.startVersionCheck(True)
     
-    @QtCore.pyqtSlot()
+    # @QtCore.pyqtSlot()
     def startVersionCheck(self, verbose = False):
         def _checkVersion():
             try:
@@ -519,7 +534,7 @@ class PyPipboyApp(QtWidgets.QApplication):
     @QtCore.pyqtSlot(dict, bool, bool, str, bool)
     def _slotFinishedCheckVersion(self, versionData, newVersionAvailable, errorState, errorString, verbose):
         self._checkVersionThread.join()
-        self._checkVersionThread = None
+        # self._checkVersionThread = None
         if errorState:
             if verbose:
                 self.showWarningMessage('Version Check', 'Could not check for new version: ' + errorString)
@@ -537,9 +552,9 @@ class PyPipboyApp(QtWidgets.QApplication):
     def setWindowStayOnTop(self, value):
         self.settings.setValue('mainwindow/stayOnTop', int(value))
         if value:
-            self.mainWindow.setWindowFlags(self.mainWindow.windowFlags() | QtCore.Qt.WindowStaysOnTopHint)
+            self.mainWindow.setWindowFlags(self.mainWindow.windowFlags() | QtCore.Qt.WindowType.WindowStaysOnTopHint)
         else:
-            self.mainWindow.setWindowFlags(self.mainWindow.windowFlags() & ~QtCore.Qt.WindowStaysOnTopHint)
+            self.mainWindow.setWindowFlags(self.mainWindow.windowFlags() & ~QtCore.Qt.WindowType.WindowStaysOnTopHint) # type: ignore
         self.mainWindow.show()
 
     @QtCore.pyqtSlot(bool)
@@ -578,7 +593,7 @@ class PyPipboyApp(QtWidgets.QApplication):
                                 i = 0
                                 for w in widgets:
                                     w.setObjectName(info.LABEL + '_' + str(i))
-                                    self.mainWindow.addDockWidget(QtCore.Qt.TopDockWidgetArea, w)
+                                    self.mainWindow.addDockWidget(QtCore.Qt.DockWidgetArea.TopDockWidgetArea, w)
                                     self.widgets.append(w)
                                     if w.getMenuCategory():
                                         try:

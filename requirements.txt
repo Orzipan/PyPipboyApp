@@ -1,4 +1,7 @@
+wheel
 PyQt5
 playsound
 pywin32
-PyPipboy @ git+git://github.com/silentspud/PyPipboy.git
+py-make
+# PyPipboy @ git+https://github.com/Orzipan/PyPipboy.git
+../PyPipboy
